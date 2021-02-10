@@ -91,9 +91,8 @@ func (r *Registry) LoadDirectory(dir string) error {
 func (r *Registry) readDirectory(dir string) error {
 	return filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
 		if path.Ext(file) == ".sql" {
-			err := r.readFile(file)
+			err := r.readFile(dir, file)
 			if err != nil {
-				panic(err)
 				return err
 			}
 		}
@@ -102,8 +101,12 @@ func (r *Registry) readDirectory(dir string) error {
 	})
 }
 
-func (r *Registry) readFile(file string) error {
-	prefix := strings.Replace(path.Base(file), path.Ext(file), "", 1)
+func (r *Registry) readFile(dir string, file string) error {
+	fileNoDir := strings.Replace(file, dir, "", 1)
+	prefix := strings.Replace(fileNoDir, path.Ext(fileNoDir), "", 1)
+	if strings.HasPrefix(prefix, "/") {
+		prefix = strings.Replace(prefix, "/", "", 1)
+	}
 
 	f, err := os.Open(file)
 	if err != nil {

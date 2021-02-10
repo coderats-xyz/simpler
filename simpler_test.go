@@ -25,7 +25,7 @@ func TestParsingQuery(t *testing.T) {
 func TestReadFile(t *testing.T) {
 	r := NewRegistry()
 
-	err := r.readFile("fixtures/sql/users.sql")
+	err := r.readFile("fixtures/sql", "fixtures/sql/users.sql")
 	assert.Nil(t, err)
 
 	assert.Len(t, r.registry, 2)
@@ -42,6 +42,6 @@ func TestReadDir(t *testing.T) {
 	assert.Len(t, r.registry, 4)
 	assert.NotNil(t, r.queryByName("users/select-user"))
 	assert.NotNil(t, r.queryByName("users/delete-user"))
-	assert.NotNil(t, r.queryByName("posts/select-post"))
-	assert.NotNil(t, r.queryByName("posts/delete-post"))
+	assert.NotNil(t, r.queryByName("content/posts/select-post"))
+	assert.NotNil(t, r.queryByName("content/posts/delete-post"))
 }
