@@ -57,7 +57,7 @@ func main() {
     // Pass named parameters to a query
     q.Bind(dbx.Params{"id": 3})
     // And execute it
-    res, err = q.Execute()
+    _, err = q.Execute()
 
     // Or you can access *dbx.DB directly
     user := User{
