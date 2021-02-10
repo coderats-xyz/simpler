@@ -13,7 +13,7 @@ Inspired by [HugSQL](https://www.hugsql.org/)
 Sample `users.sql` file in `data/sql` directory of our project.
 
 ```sql
--- name: select-user
+-- name: all-users
 SELECT * FROM users
 
 -- name: delete-user
@@ -47,7 +47,7 @@ func main() {
 
     // q is just a *dbx.Query from ozzo-dbx package
     // same result as using dbx.NewQuery call
-    q := registry.Query("users/select-user")
+    q := registry.Query("users/all-users")
 
     var users []User
     err := q.All(&users)
