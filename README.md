@@ -28,7 +28,7 @@ import "coderats.dev/simpler"
 
 func main() {
     // Load all *.sql files from a directory
-    registry, err := NewRegistry("data/sql")
+    registry, err := simpler.NewRegistry("data/sql")
     if err != nil {
         panic(err)
     }
