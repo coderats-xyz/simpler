@@ -103,8 +103,6 @@ func (r *Registry) readDirectory(dir string) error {
 }
 
 func (r *Registry) readFile(file string) error {
-	println("loading queries from")
-	println(file)
 	prefix := strings.Replace(path.Base(file), path.Ext(file), "", 1)
 
 	f, err := os.Open(file)
