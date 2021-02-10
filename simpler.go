@@ -60,8 +60,15 @@ func NewRegistry() *Registry {
 	}
 }
 
-func (r *Registry) MustConnect(adapter string, dbUrl string) {
-	r.DB = dbx.MustOpen(adapter, dbUrl)
+func (r *Registry) Connect(adapter string, dbUrl string) error {
+	db, err := dbx.MustOpen(adapter, dbUrl)
+	if err != nil {
+		return err
+	}
+
+	r.DB = db
+
+	return nil
 }
 
 func (r *Registry) Query(name string) *dbx.Query {
