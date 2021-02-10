@@ -47,7 +47,7 @@ func (q *Query) readMetadata(line string) error {
 }
 
 func (q *Query) readSQL(line string) error {
-	q.SQL = fmt.Sprintf("%s %s", q.SQL, line)
+	q.SQL = strings.Trim(fmt.Sprintf("%s %s", q.SQL, line), "\n")
 	return nil
 }
 
@@ -110,6 +110,16 @@ func (r *Registry) Query(name string) *dbx.Query {
 
 	q := r.queryByName(name)
 	return r.db.NewQuery(q.SQL)
+}
+
+// QueryString returns raw SQL string
+// string will be empty if registry has no such query
+func (r *Registry) QueryString(name string) string {
+	if !r.HasQuery(name) {
+		return ""
+	}
+
+	return r.queryByName(name).SQL
 }
 
 // LoadDirectory reads all *.sql files in a given directory

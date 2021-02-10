@@ -32,6 +32,8 @@ func TestReadFile(t *testing.T) {
 	assert.Len(t, r.registry, 2)
 	assert.NotNil(t, r.queryByName("users/select-user"))
 	assert.NotNil(t, r.queryByName("users/delete-user"))
+
+	assert.Equal(t, " SELECT * FROM users WHERE id = ? ", r.QueryString("users/select-user"))
 }
 
 func TestReadDir(t *testing.T) {
