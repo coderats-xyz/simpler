@@ -24,11 +24,23 @@ DELETE FROM users WHERE id = {:id}
 ```go
 package main
 
-import "coderats.dev/simpler"
+import (
+    "coderats.dev/simpler"
+    _ "github.com/jackc/pgx/stdlib"
+)
 
 func main() {
     // Load all *.sql files from a directory
     registry, err := simpler.NewRegistry("data/sql")
+    if err != nil {
+        panic(err)
+    }
+
+    // you can use any adapter that ozzo-dbx support
+    // for example with the following import
+    // import _ "github.com/go-sql-driver/mysql"
+    // you can use "mysql" as an adapter string (first arg to Connect)
+    err = registry.Connect("pgx", "postgres://root:root@localhost:5432/mydb_dev")
     if err != nil {
         panic(err)
     }
