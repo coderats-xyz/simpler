@@ -1,0 +1,12 @@
+name: CI
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: golang:1.14-alpine
+    steps:
+    - uses: actions/checkout@v2
+    - run:  go test -v
