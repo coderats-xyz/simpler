@@ -131,6 +131,16 @@ func (r *Registry) LoadDirectory(dir string) error {
 	return r.readDirectory(dir)
 }
 
+func (r *Registry) saveQuery(query *Query) error {
+	if len(query.Name) == 0 {
+		return fmt.Errorf("Found query without a name: %#v", query)
+	}
+
+	r.registry[query.Name] = query
+
+	return nil
+}
+
 func (r *Registry) readDirectory(dir string) error {
 	return filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
 		if path.Ext(file) == ".sql" {
@@ -171,11 +181,10 @@ func (r *Registry) readFile(dir string, file string) error {
 
 		if strings.HasPrefix(line, "-- name:") {
 			if query != nil {
-				if len(query.Name) == 0 {
-					return fmt.Errorf("Found query without a name: %#v", query)
+				qerr = r.saveQuery(query)
+				if qerr != nil {
+					return qerr
 				}
-
-				r.registry[query.Name] = query
 			}
 
 			query = NewQuery(prefix)
@@ -195,11 +204,10 @@ func (r *Registry) readFile(dir string, file string) error {
 
 		if err == io.EOF {
 			if query != nil {
-				if len(query.Name) == 0 {
-					return fmt.Errorf("Found query without a name: %#v", query)
+				qerr = r.saveQuery(query)
+				if qerr != nil {
+					return qerr
 				}
-
-				r.registry[query.Name] = query
 			}
 			break
 		}
