@@ -53,5 +53,10 @@ func main() {
         Email: "test@example.com",
     }
     err = registry.DB().Model(&user).Insert()
+
+    // Example database/sql pool configuration
+    registry.DB().DB().SetMaxOpenConns(100)
+    registry.DB().DB().SetMaxIdleConns(10)
+    registry.DB().DB().SetConnMaxLifetime(0)
 }
 ```
