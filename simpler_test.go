@@ -13,19 +13,20 @@ func TestParsingQuery(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, q.Name, "users/delete-user")
 
-	err = q.readSql("SELECT * FROM")
+	err = q.readSQL("SELECT * FROM")
 	assert.Nil(t, err)
 
-	err = q.readSql("users WHERE id = ?")
+	err = q.readSQL("users WHERE id = ?")
 	assert.Nil(t, err)
 
-	assert.Equal(t, q.Sql, " SELECT * FROM users WHERE id = ?")
+	assert.Equal(t, q.SQL, " SELECT * FROM users WHERE id = ?")
 }
 
 func TestReadFile(t *testing.T) {
-	r := NewRegistry()
+	r, err := NewRegistry()
+	assert.Nil(t, err)
 
-	err := r.readFile("fixtures/sql", "fixtures/sql/users.sql")
+	err = r.readFile("fixtures/sql", "fixtures/sql/users.sql")
 	assert.Nil(t, err)
 
 	assert.Len(t, r.registry, 2)
@@ -34,9 +35,7 @@ func TestReadFile(t *testing.T) {
 }
 
 func TestReadDir(t *testing.T) {
-	r := NewRegistry()
-
-	err := r.readDirectory("fixtures/sql")
+	r, err := NewRegistry("fixtures/sql")
 	assert.Nil(t, err)
 
 	assert.Len(t, r.registry, 4)

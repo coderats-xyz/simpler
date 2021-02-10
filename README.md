@@ -27,15 +27,13 @@ package main
 import "coderats.dev/simpler"
 
 func main() {
-    registry := NewRegistry()
-
     // Load all *.sql files from a directory
-    err := registry.LoadDirectory("data/sql")
+    registry, err := NewRegistry("data/sql")
     if err != nil {
         panic(err)
     }
 
-    // q is just a Query from dbx package
+    // q is just a *dbx.Query from ozzo-dbx package
     // same result as using dbx.NewQuery call
     q := registry.Query("users/select-user")
 
@@ -48,5 +46,12 @@ func main() {
     q.Bind(dbx.Params{"id": 3})
     // And execute it
     res, err = q.Execute()
+
+    // Or you can access *dbx.DB directly
+    user := User{
+        Name: "example",
+        Email: "test@example.com",
+    }
+    err = registry.DB().Model(&user).Insert()
 }
 ```

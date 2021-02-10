@@ -15,12 +15,14 @@ import (
 
 var metaReg = regexp.MustCompile(`--\s([a-zA-Z-]+):\s([a-zA-Z-]+)`)
 
+// Query represents data loaded from a SQL file
 type Query struct {
 	Prefix string
 	Name   string
-	Sql    string
+	SQL    string
 }
 
+// NewQuery returns new empty query with a given prefix
 func NewQuery(prefix string) *Query {
 	return &Query{Prefix: prefix}
 }
@@ -44,46 +46,77 @@ func (q *Query) readMetadata(line string) error {
 	return nil
 }
 
-func (q *Query) readSql(line string) error {
-	q.Sql = fmt.Sprintf("%s %s", q.Sql, line)
+func (q *Query) readSQL(line string) error {
+	q.SQL = fmt.Sprintf("%s %s", q.SQL, line)
 	return nil
 }
 
+// Registry holds queries and *dbx.DB object
+// is capable of loading queries from a folder
 type Registry struct {
 	registry map[string]*Query
-	DB       *dbx.DB
+	db       *dbx.DB
 }
 
-func NewRegistry() *Registry {
-	return &Registry{
+// NewRegistry creates a new registry
+// and loads queries from a list of directiories
+func NewRegistry(dirs ...string) (*Registry, error) {
+	r := &Registry{
 		registry: map[string]*Query{},
 	}
+
+	for _, dir := range dirs {
+		err := r.readDirectory(dir)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return r, nil
 }
 
-func (r *Registry) Connect(adapter string, dbUrl string) error {
-	db, err := dbx.MustOpen(adapter, dbUrl)
+// DB returns pointer to *dbx.DB instance
+func (r *Registry) DB() *dbx.DB {
+	return r.db
+}
+
+// Connect registry to a dabatase using adapter and url
+func (r *Registry) Connect(adapter string, dbURL string) error {
+	db, err := dbx.MustOpen(adapter, dbURL)
 	if err != nil {
 		return err
 	}
 
-	r.DB = db
+	r.db = db
 
 	return nil
 }
 
+// HasQuery returns true if registry has loaded query named name
+func (r *Registry) HasQuery(name string) bool {
+	_, ok := r.registry[name]
+	return ok
+}
+
+// Query returns *dbx.Query created from a query found in *.sql files with name `name`
 func (r *Registry) Query(name string) *dbx.Query {
-	if r.DB == nil {
+	if r.db == nil {
 		panic("Must connect first before creating a query")
 	}
 
-	q := r.queryByName(name)
-	if q == nil {
+	if !r.HasQuery(name) {
 		panic(fmt.Sprintf("Query not found with name %s", name))
 	}
 
-	return r.DB.NewQuery(q.Sql)
+	q := r.queryByName(name)
+	return r.db.NewQuery(q.SQL)
 }
 
+// LoadDirectory reads all *.sql files in a given directory
+// All nested folders will be processed also
+// Nested folder names are preserved and used as a prefix in query name
+// so query `delete-user` from a file `sql/user-queries/users` will have name
+// `user-queries/users/delete-user`
 func (r *Registry) LoadDirectory(dir string) error {
 	return r.readDirectory(dir)
 }
@@ -144,7 +177,7 @@ func (r *Registry) readFile(dir string, file string) error {
 				return qerr
 			}
 		} else {
-			qerr = query.readSql(line)
+			qerr = query.readSQL(line)
 			if qerr != nil {
 				return qerr
 			}
