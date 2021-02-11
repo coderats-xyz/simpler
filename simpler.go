@@ -23,7 +23,7 @@ type Query struct {
 func NewQuery(prefix string) *Query {
 	return &Query{Prefix: prefix}
 }
-func (q *Query) processMeta(meta *MetaData) error {
+func (q *Query) processMeta(meta *metaData) error {
 	switch meta.Key {
 	case "name":
 		q.Name = fmt.Sprintf("%s/%s", q.Prefix, meta.Value)
