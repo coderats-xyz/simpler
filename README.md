@@ -13,13 +13,14 @@ Inspired by [HugSQL](https://www.hugsql.org/)
 Sample `users.sql` file in `data/sql` directory of our project.
 
 ```sql
--- name: all-users
+-- name: all_users
 SELECT * FROM users
 
--- name: delete-user
+-- name: delete_user
 DELETE FROM users WHERE id = {:id}
 ```
 
+Metadata inf `sql` files follows format `-- key: value` where value for `name` key has to be a valid identifier (should match `\w+`).
 
 ```go
 package main
@@ -47,13 +48,13 @@ func main() {
 
     // q is just a *dbx.Query from ozzo-dbx package
     // same result as using dbx.NewQuery call
-    q := registry.Query("users/all-users")
+    q := registry.Query("users/all_users")
 
     var users []User
     err := q.All(&users)
 
-    // Load delete-user query
-    q = registry.Query("users/delete-user")
+    // Load delete_user query
+    q = registry.Query("users/delete_user")
     // Pass named parameters to a query
     q.Bind(dbx.Params{"id": 3})
     // And execute it
