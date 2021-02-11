@@ -167,7 +167,10 @@ func (r *Registry) readFile(dir string, file string) error {
 			return err
 		}
 
-		meta, isMeta, _ := parseMeta(line)
+		meta, isMeta, metaErr := parseMeta(line)
+		if strings.HasPrefix(line, "--") && metaErr != nil {
+			return metaErr
+		}
 
 		if isMeta && meta.Key == "name" {
 			if query != nil {

@@ -50,3 +50,12 @@ func TestReadDir(t *testing.T) {
 	assert.NotNil(t, r.queryByName("content/posts/select_post"))
 	assert.NotNil(t, r.queryByName("content/posts/delete_post"))
 }
+
+func TestReadFileMalformed(t *testing.T) {
+	r, err := NewRegistry()
+	assert.Nil(t, err)
+
+	err = r.readFile("fixtures/badsql", "fixtures/badsql/users.sql")
+	assert.NotNil(t, err)
+	assert.Len(t, r.registry, 0)
+}
