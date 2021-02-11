@@ -9,9 +9,13 @@ import (
 func TestParsingQuery(t *testing.T) {
 	q := NewQuery("users")
 
-	err := q.readMetadata("-- name: delete-user")
+	meta, ok, err := parseMeta("-- name: delete_user")
 	assert.Nil(t, err)
-	assert.Equal(t, q.Name, "users/delete-user")
+	assert.True(t, ok)
+
+	err = q.processMeta(meta)
+	assert.Nil(t, err)
+	assert.Equal(t, q.Name, "users/delete_user")
 
 	err = q.readSQL("SELECT * FROM")
 	assert.Nil(t, err)
@@ -30,10 +34,10 @@ func TestReadFile(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Len(t, r.registry, 2)
-	assert.NotNil(t, r.queryByName("users/select-user"))
-	assert.NotNil(t, r.queryByName("users/delete-user"))
+	assert.NotNil(t, r.queryByName("users/select_user"))
+	assert.NotNil(t, r.queryByName("users/delete_user"))
 
-	assert.Equal(t, " SELECT * FROM users WHERE id = ? ", r.QueryString("users/select-user"))
+	assert.Equal(t, " SELECT * FROM users WHERE id = ? ", r.QueryString("users/select_user"))
 }
 
 func TestReadDir(t *testing.T) {
@@ -41,8 +45,8 @@ func TestReadDir(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Len(t, r.registry, 4)
-	assert.NotNil(t, r.queryByName("users/select-user"))
-	assert.NotNil(t, r.queryByName("users/delete-user"))
-	assert.NotNil(t, r.queryByName("content/posts/select-post"))
-	assert.NotNil(t, r.queryByName("content/posts/delete-post"))
+	assert.NotNil(t, r.queryByName("users/select_user"))
+	assert.NotNil(t, r.queryByName("users/delete_user"))
+	assert.NotNil(t, r.queryByName("content/posts/select_post"))
+	assert.NotNil(t, r.queryByName("content/posts/delete_post"))
 }

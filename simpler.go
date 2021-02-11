@@ -7,13 +7,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	dbx "github.com/go-ozzo/ozzo-dbx"
 )
-
-var metaReg = regexp.MustCompile(`--\s([a-zA-Z-]+):\s([a-zA-Z-]+)`)
 
 // Query represents data loaded from a SQL file
 type Query struct {
@@ -26,21 +23,12 @@ type Query struct {
 func NewQuery(prefix string) *Query {
 	return &Query{Prefix: prefix}
 }
-
-func (q *Query) readMetadata(line string) error {
-	matches := metaReg.FindStringSubmatch(line)
-
-	if len(matches) < 3 {
-		return fmt.Errorf(`Could not parse metadata line: "%s"`, line)
-	}
-	k := matches[1]
-	v := matches[2]
-
-	switch k {
+func (q *Query) processMeta(meta *MetaData) error {
+	switch meta.Key {
 	case "name":
-		q.Name = fmt.Sprintf("%s/%s", q.Prefix, v)
+		q.Name = fmt.Sprintf("%s/%s", q.Prefix, meta.Value)
 	default:
-		return fmt.Errorf(`Unknown metadata key %s with value %s`, k, v)
+		return fmt.Errorf(`Unknown metadata key %s with value %s`, meta.Key, meta.Value)
 	}
 
 	return nil
@@ -179,7 +167,9 @@ func (r *Registry) readFile(dir string, file string) error {
 			return err
 		}
 
-		if strings.HasPrefix(line, "-- name:") {
+		meta, isMeta, _ := parseMeta(line)
+
+		if isMeta && meta.Key == "name" {
 			if query != nil {
 				qerr = r.saveQuery(query)
 				if qerr != nil {
@@ -190,8 +180,8 @@ func (r *Registry) readFile(dir string, file string) error {
 			query = NewQuery(prefix)
 		}
 
-		if strings.HasPrefix(line, "--") {
-			qerr = query.readMetadata(line)
+		if isMeta {
+			qerr = query.processMeta(meta)
 			if qerr != nil {
 				return qerr
 			}

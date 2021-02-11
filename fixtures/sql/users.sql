@@ -1,5 +1,5 @@
--- name: select-user
+-- name: select_user
 SELECT * FROM users WHERE id = ?
 
--- name: delete-user
+-- name: delete_user
 DELETE FROM users WHERE id = ?
