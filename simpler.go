@@ -130,9 +130,14 @@ func (r *Registry) saveQuery(query *Query) error {
 }
 
 func (r *Registry) readDirectory(dir string) error {
+	parser, err := newMetaParser()
+	if err != nil {
+		return err
+	}
+
 	return filepath.Walk(dir, func(file string, info os.FileInfo, err error) error {
 		if path.Ext(file) == ".sql" {
-			err := r.readFile(dir, file)
+			err := r.readFile(dir, file, parser)
 			if err != nil {
 				return err
 			}
@@ -142,7 +147,7 @@ func (r *Registry) readDirectory(dir string) error {
 	})
 }
 
-func (r *Registry) readFile(dir string, file string) error {
+func (r *Registry) readFile(dir string, file string, parser *metaParser) error {
 	fileNoDir := strings.Replace(file, dir, "", 1)
 	prefix := strings.Replace(fileNoDir, path.Ext(fileNoDir), "", 1)
 	if strings.HasPrefix(prefix, "/") {
@@ -167,7 +172,7 @@ func (r *Registry) readFile(dir string, file string) error {
 			return err
 		}
 
-		meta, isMeta, metaErr := parseMeta(line)
+		meta, isMeta, metaErr := parser.parseMeta(line)
 		if strings.HasPrefix(line, "--") && metaErr != nil {
 			return metaErr
 		}

@@ -9,7 +9,9 @@ import (
 func TestParsingQuery(t *testing.T) {
 	q := NewQuery("users")
 
-	meta, ok, err := parseMeta("-- name: delete_user")
+	p, err := newMetaParser()
+	assert.Nil(t, err)
+	meta, ok, err := p.parseMeta("-- name: delete_user")
 	assert.Nil(t, err)
 	assert.True(t, ok)
 
@@ -30,7 +32,9 @@ func TestReadFile(t *testing.T) {
 	r, err := NewRegistry()
 	assert.Nil(t, err)
 
-	err = r.readFile("fixtures/sql", "fixtures/sql/users.sql")
+	p, err := newMetaParser()
+	assert.Nil(t, err)
+	err = r.readFile("fixtures/sql", "fixtures/sql/users.sql", p)
 	assert.Nil(t, err)
 
 	assert.Len(t, r.registry, 2)
@@ -55,7 +59,9 @@ func TestReadFileMalformed(t *testing.T) {
 	r, err := NewRegistry()
 	assert.Nil(t, err)
 
-	err = r.readFile("fixtures/badsql", "fixtures/badsql/users.sql")
+	p, err := newMetaParser()
+	assert.Nil(t, err)
+	err = r.readFile("fixtures/badsql", "fixtures/badsql/users.sql", p)
 	assert.NotNil(t, err)
 	assert.Len(t, r.registry, 0)
 }

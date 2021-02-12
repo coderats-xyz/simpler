@@ -7,8 +7,10 @@ import (
 )
 
 func TestParsingMetaLineCorrect(t *testing.T) {
-	md, ok, err := parseMeta("-- name: delete_user")
+	p, err := newMetaParser()
+	assert.Nil(t, err)
 
+	md, ok, err := p.parseMeta("-- name: delete_user")
 	assert.Nil(t, err)
 	assert.True(t, ok)
 	assert.Equal(t, "name", md.Key)
