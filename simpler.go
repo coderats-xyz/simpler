@@ -3,7 +3,6 @@ package simpler
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -155,18 +154,18 @@ func (r *Registry) readFile(dir string, file string) error {
 	}
 	defer f.Close()
 
-	reader := bufio.NewReader(f)
+	scanner := bufio.NewScanner(f)
+	// maybe later this will be needed to fix "token too long" error
+	// const maxCapacity = 1024 * 1024
+	// buf := make([]byte, maxCapacity)
+	// scanner.Buffer(buf, maxCapacity)
 
 	var qerr error
 	var line string
 	var query *Query
 
-	for {
-		line, err = reader.ReadString('\n')
-		if err != nil && err != io.EOF {
-			return err
-		}
-
+	for scanner.Scan() {
+		line = scanner.Text()
 		meta, isMeta, metaErr := parseMeta(line)
 		if strings.HasPrefix(line, "--") && metaErr != nil {
 			return metaErr
@@ -194,15 +193,16 @@ func (r *Registry) readFile(dir string, file string) error {
 				return qerr
 			}
 		}
+	}
 
-		if err == io.EOF {
-			if query != nil {
-				qerr = r.saveQuery(query)
-				if qerr != nil {
-					return qerr
-				}
-			}
-			break
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	if query != nil {
+		qerr = r.saveQuery(query)
+		if qerr != nil {
+			return qerr
 		}
 	}
 
